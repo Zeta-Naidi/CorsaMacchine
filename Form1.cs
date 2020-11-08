@@ -26,24 +26,30 @@ namespace CorsaMacchine
             BackgroundWorker BGW = sender as BackgroundWorker;
             PictureBox Car = (PictureBox)e.Argument;
 
-            while (Car.Location.X < pbPista.Width - Car.Width +pbPista.Location.X)
+            while (Car.Location.X < pbPista.Width - Car.Width + pbPista.Location.X)
             {
                 if (!BGW.CancellationPending)
                 {
+                    //per il pareggio
+                    //Thread.Sleep(5); 
+                    //int x = 3;
+
                     Thread.Sleep(rnd.Next(0, 10));
                     int x = rnd.Next(0, 4);
                     BGW.ReportProgress(x, Car);
                 }
+                else return;
             }
-            if (!BGW.CancellationPending)
-            { e.Result = Car; }
+
+            if (!BGW.CancellationPending) { e.Result = Car; }
+
             backgroundWorker1.CancelAsync();
             backgroundWorker2.CancelAsync();
         }
 
         private void backgroundWorker1_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            PictureBox Car = (PictureBox)e.UserState;
+            PictureBox Car = e.UserState as PictureBox;
             int x = Car.Location.X + e.ProgressPercentage;
             Car.Location = new Point(x, Car.Location.Y);
         }
@@ -51,9 +57,10 @@ namespace CorsaMacchine
         private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             var Car = e.Result as PictureBox;
-            if (Car == null) { MessageBox.Show("PAREGGIO"); }
-            else if (Car.Name == pbCar1.ToString()) { MessageBox.Show("THE WINNER IS BLACK CAR"); }
+            if (Car == null) { }
+            else if (Car.Name == "pbCar1") { MessageBox.Show("THE WINNER IS BLACK CAR"); }
             else  { MessageBox.Show("THE WINNER IS RED CAR"); }
+            button1.Enabled = true;
         }
 
         public void Reposition()
@@ -65,14 +72,10 @@ namespace CorsaMacchine
         private void button1_Click(object sender, EventArgs e)
         {
             Reposition();
+            button1.Enabled = false;
             backgroundWorker1.RunWorkerAsync(pbCar1);
             backgroundWorker2.RunWorkerAsync(pbCar2);
         }
 
-        private void button2_Click(object sender, EventArgs e)
-        {
-            backgroundWorker1.CancelAsync();
-            backgroundWorker2.CancelAsync();
-        }
     }
 }
